@@ -8,7 +8,6 @@ Component: <AuthLayout /> - Centered authentication wrapper layout.
 
 Component: <AuthForm /> - Login form with email and password fields.
 
-
 Page: /dashboard (Main landing page after successful login)
 
 Component: <Sidebar /> - Navigation links (Dashboard, Assets, Employees, Assignments, Reports).
@@ -20,7 +19,6 @@ Component: <StatCards /> - 3–4 cards showing Total Assets, Assigned Assets, Av
 Component: <RecentAssignmentsTable /> - Mini-table showing the latest 5 asset assignments.
 
 Component: <QuickActionsPanel /> - Quick buttons (Add Asset, Add Employee, Assign Asset).
-
 
 Page: /assets (Manage all company assets)
 
@@ -36,7 +34,6 @@ Component: <EditAssetModal /> - Modal form to update asset details.
 
 Component: <DeleteAssetDialog /> - Confirmation dialog before deleting asset.
 
-
 Page: /employees (Manage company employees)
 
 Component: <Sidebar /> - Reused navigation component.
@@ -50,7 +47,6 @@ Component: <AddEmployeeModal /> - Modal to add new employee.
 Component: <EditEmployeeModal /> - Modal to edit employee information.
 
 Component: <DeleteEmployeeDialog /> - Confirmation dialog before deletion.
-
 
 Page: /assignments (Assign and track asset allocation)
 
@@ -66,7 +62,6 @@ Component: <ReturnAssetModal /> - Modal to mark asset as returned.
 
 Component: <FilterBar /> - Filter assignments by employee, asset type, and status.
 
-
 Page: /reports (View asset reports and history)
 
 Component: <Sidebar /> - Reused navigation component.
@@ -77,8 +72,6 @@ Component: <ConditionReportTable /> - Displays asset condition and maintenance h
 
 Component: <GenerateReportButton /> - Button to download CSV or PDF reports.
 
-
-
 Role: Standard Employee (Can only view assigned assets and report issues)
 
 Page: /login (Authentication page for employee access)
@@ -87,7 +80,6 @@ Component: <AuthLayout /> - Reused authentication layout.
 
 Component: <AuthForm /> - Login form.
 
-
 Page: /my-dashboard (Employee landing page after login)
 
 Component: <TopNavbar /> - Displays employee name and logout button.
@@ -95,7 +87,6 @@ Component: <TopNavbar /> - Displays employee name and logout button.
 Component: <MyAssetSummaryCard /> - Card showing total assets assigned.
 
 Component: <RecentActivityFeed /> - Displays recent assignment or return history.
-
 
 Page: /my-assets (View all assigned assets)
 
@@ -106,7 +97,6 @@ Component: <MyAssetList /> - Grid or list view of assigned assets.
 Component: <AssetCard /> - Individual asset display card with basic details.
 
 Component: <ReportIssueButton /> - Button to open issue reporting form.
-
 
 Page: /report-issue (Submit issue for assigned asset)
 

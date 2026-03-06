@@ -6,7 +6,7 @@ export default function Sidebar() {
 
   // Temporary role simulation
   const user = {
-    role: "employee"   // change to "employee" to test
+    role: "admin"   // change to "employee" to test
   }
 
   const adminLinks = [
@@ -28,7 +28,7 @@ export default function Sidebar() {
     <div className="w-60 h-screen bg-slate-900 text-white p-4">
 
       <h2 className="text-xl font-bold mb-6">
-        OptiAsset
+        Asset_Valet
       </h2>
 
       <ul className="space-y-4">

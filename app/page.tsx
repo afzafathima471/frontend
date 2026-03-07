@@ -18,7 +18,7 @@ export default function Home() {
             </div>
 
             <h1 className="text-2xl font-bold">
-              RBAC Dashboard
+              Welcome!👋 to Asset_Valet
             </h1>
 
           </CardContent>

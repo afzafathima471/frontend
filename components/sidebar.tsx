@@ -25,7 +25,7 @@ export default function Sidebar() {
   const links = user.role === "admin" ? adminLinks : employeeLinks
 
   return (
-    <div className="w-60 h-screen bg-slate-900 text-white p-4">
+    <div className="w-60 h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-4 border-r border-slate-200 dark:border-slate-700">
 
       <h2 className="text-xl font-bold mb-6">
         Asset_Valet

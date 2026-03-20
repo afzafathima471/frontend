@@ -1,5 +1,11 @@
+import type { Metadata } from "next"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+
+export const metadata: Metadata = {
+  title: "Asset Valet",
+  description: "IT Asset Management System",
+}
 
 export default function RootLayout({
   children,

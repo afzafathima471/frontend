@@ -1,46 +1,92 @@
 "use client"
-
 import Link from "next/link"
+import { useState } from "react"
 
-export default function Sidebar() {
+const adminLinks = [
+  { name: "Dashboard", path: "/dashboard", icon: "⬛" },
+  { name: "Assets", path: "/assets", icon: "💼" },
+  { name: "Employees", path: "/employees", icon: "👥" },
+  { name: "Assignments", path: "/assignments", icon: "🔗" },
+  { name: "Reports", path: "/reports", icon: "📊" },
+]
 
-  // Temporary role simulation
-  const user = {
-    role: "admin"   // change to "employee" to test
-  }
+const employeeLinks = [
+  { name: "My Assets", path: "/my-assets", icon: "💼" },
+  { name: "Report Issue", path: "/report-issue", icon: "🚨" },
+]
 
-  const adminLinks = [
-    { name: "Dashboard", path: "/dashboard" },
-    { name: "Assets", path: "/assets" },
-    { name: "Employees", path: "/employees" },
-    { name: "Assignments", path: "/assignments" },
-    { name: "Reports", path: "/reports" }
-  ]
-
-  const employeeLinks = [
-    { name: "My Assets", path: "/my-assets" },
-    { name: "Report Issue", path: "/report-issue" }
-  ]
-
-  const links = user.role === "admin" ? adminLinks : employeeLinks
+export default function Sidebar({ role = "admin" }: { role?: string }) {
+  const [active, setActive] = useState("Dashboard")
+  const links = role === "admin" ? adminLinks : employeeLinks
 
   return (
-    <div className="w-60 h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-4 border-r border-slate-200 dark:border-slate-700">
+    <div
+      style={{
+        width: "240px",
+        minHeight: "100vh",
+        backgroundColor: "var(--sidebar-bg)",
+        borderRight: "1px solid #1e293b",
+        display: "flex",
+        flexDirection: "column",
+        padding: "24px 16px",
+        gap: "4px",
+      }}
+    >
+      {/* Logo */}
+      <div style={{ marginBottom: "32px", paddingLeft: "12px" }}>
+        <div style={{
+          fontSize: "18px",
+          fontWeight: "700",
+          color: "#ffffff",
+          letterSpacing: "-0.5px",
+        }}>
+          Asset<span style={{ color: "#6366f1" }}>Valet</span>
+        </div>
+        <div style={{ fontSize: "11px", color: "#475569", marginTop: "2px" }}>
+          {role === "admin" ? "Administrator" : "Employee"}
+        </div>
+      </div>
 
-      <h2 className="text-xl font-bold mb-6">
-        Asset_Valet
-      </h2>
-
-      <ul className="space-y-4">
+      {/* Nav Links */}
+      <nav style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
         {links.map((link) => (
-          <li key={link.name}>
-            <Link href={link.path}>
-              {link.name}
-            </Link>
-          </li>
+          <Link
+            key={link.name}
+            href={link.path}
+            onClick={() => setActive(link.name)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "10px 12px",
+              borderRadius: "8px",
+              fontSize: "14px",
+              fontWeight: active === link.name ? "600" : "400",
+              color: active === link.name ? "#ffffff" : "var(--sidebar-text)",
+              backgroundColor: active === link.name ? "#6366f1" : "transparent",
+              textDecoration: "none",
+              transition: "all 0.15s ease",
+            }}
+          >
+            <span style={{ fontSize: "16px" }}>{link.icon}</span>
+            {link.name}
+          </Link>
         ))}
-      </ul>
+      </nav>
 
+      {/* Bottom role badge */}
+      <div style={{ marginTop: "auto", paddingLeft: "12px" }}>
+        <div style={{
+          fontSize: "11px",
+          color: "#475569",
+          padding: "8px 12px",
+          backgroundColor: "#1e293b",
+          borderRadius: "8px",
+          display: "inline-block",
+        }}>
+          🔐 {role === "admin" ? "Admin Access" : "Employee Access"}
+        </div>
+      </div>
     </div>
   )
 }

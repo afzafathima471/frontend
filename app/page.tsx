@@ -1,23 +1,10 @@
+// @ts-nocheck 
 "use client"
+import { useEffect, useState } from "react"
 import Sidebar from "@/components/sidebar"
 import { ThemeToggle } from "@/components/theme-toggle"
 
-const role = "admin" // change to "employee" for employee view
-
-const stats = [
-  { label: "Total Assets", value: "248", icon: "💼", color: "#6366f1", bg: "#eef2ff" },
-  { label: "Assigned", value: "183", icon: "🔗", color: "#0ea5e9", bg: "#e0f2fe" },
-  { label: "Available", value: "41", icon: "✅", color: "#10b981", bg: "#d1fae5" },
-  { label: "In Repair", value: "24", icon: "🔧", color: "#f59e0b", bg: "#fef3c7" },
-]
-
-const assets = [
-  { name: "MacBook Pro 14\"", employee: "Rahul Sharma", status: "Assigned", dept: "Engineering" },
-  { name: "Dell Monitor 27\"", employee: "Priya Nair", status: "Available", dept: "Design" },
-  { name: "iPhone 14 Pro", employee: "Amit Verma", status: "In Repair", dept: "Sales" },
-  { name: "Logitech MX Keys", employee: "Sara Khan", status: "Assigned", dept: "HR" },
-  { name: "iPad Air 5th Gen", employee: "Unassigned", status: "Available", dept: "—" },
-]
+const role = "admin"
 
 const statusColor: Record<string, { color: string; bg: string }> = {
   Assigned: { color: "#0ea5e9", bg: "#e0f2fe" },
@@ -27,14 +14,43 @@ const statusColor: Record<string, { color: string; bg: string }> = {
 }
 
 export default function Home() {
+  const [employees, setEmployees] = useState([]) 
+  const [assets, setAssets] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [empRes, assetRes] = await Promise.all([
+          fetch("http://localhost:8000/employees"),
+          fetch("http://localhost:8000/assets"),
+        ])
+        const empData = await empRes.json()
+        const assetData = await assetRes.json()
+        setEmployees(empData)
+        setAssets(assetData)
+      } catch (error) {
+        console.error("API Error:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const stats = [
+    { label: "Total Assets", value: assets.length, icon: "💼", bg: "#eef2ff" },
+    { label: "Employees", value: employees.length, icon: "👥", bg: "#e0f2fe" },
+    { label: "Available", value: assets.filter((a: any) => a.status === "Available").length, icon: "✅", bg: "#d1fae5" },
+    { label: "In Repair", value: assets.filter((a: any) => a.status === "In Repair").length, icon: "🔧", bg: "#fef3c7" },
+  ]
+
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "var(--bg)" }}>
       <Sidebar role={role} />
 
-      {/* Main Content */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-
-        {/* Top Navbar */}
+        {/* Navbar */}
         <div style={{
           height: "64px",
           borderBottom: "1px solid var(--border)",
@@ -55,7 +71,7 @@ export default function Home() {
           <ThemeToggle />
         </div>
 
-        {/* Page Body */}
+        {/* Body */}
         <div style={{ padding: "32px", flex: 1 }}>
 
           {/* Stat Cards */}
@@ -70,7 +86,6 @@ export default function Home() {
                 backgroundColor: "var(--surface)",
                 borderRadius: "12px",
                 padding: "20px",
-                boxShadow: "var(--card-shadow)",
                 border: "1px solid var(--border)",
               }}>
                 <div style={{
@@ -78,13 +93,12 @@ export default function Home() {
                   borderRadius: "10px",
                   backgroundColor: stat.bg,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "18px",
-                  marginBottom: "12px",
+                  fontSize: "18px", marginBottom: "12px",
                 }}>
                   {stat.icon}
                 </div>
                 <div style={{ fontSize: "28px", fontWeight: "700", color: "var(--text-primary)" }}>
-                  {stat.value}
+                  {loading ? "..." : stat.value}
                 </div>
                 <div style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: "4px" }}>
                   {stat.label}
@@ -93,76 +107,76 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Recent Assets Table */}
+          {/* Assets Table */}
           <div style={{
             backgroundColor: "var(--surface)",
             borderRadius: "12px",
             border: "1px solid var(--border)",
-            boxShadow: "var(--card-shadow)",
             overflow: "hidden",
           }}>
             <div style={{
               padding: "20px 24px",
               borderBottom: "1px solid var(--border)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
+              fontSize: "15px",
+              fontWeight: "600",
+              color: "var(--text-primary)",
             }}>
-              <div style={{ fontSize: "15px", fontWeight: "600", color: "var(--text-primary)" }}>
-                Recent Assets
-              </div>
-              <div style={{ fontSize: "13px", color: "#6366f1", cursor: "pointer" }}>
-                View all →
-              </div>
+              Assets from Database
             </div>
 
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ backgroundColor: "var(--bg)" }}>
-                  {["Asset Name", "Employee", "Department", "Status"].map((h) => (
-                    <th key={h} style={{
-                      padding: "12px 24px",
-                      textAlign: "left",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      color: "var(--text-secondary)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                    }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {assets.map((asset, i) => (
-                  <tr key={i} style={{
-                    borderTop: "1px solid var(--border)",
-                    transition: "background 0.15s",
-                  }}>
-                    <td style={{ padding: "14px 24px", fontSize: "14px", fontWeight: "500", color: "var(--text-primary)" }}>
-                      {asset.name}
-                    </td>
-                    <td style={{ padding: "14px 24px", fontSize: "14px", color: "var(--text-secondary)" }}>
-                      {asset.employee}
-                    </td>
-                    <td style={{ padding: "14px 24px", fontSize: "14px", color: "var(--text-secondary)" }}>
-                      {asset.dept}
-                    </td>
-                    <td style={{ padding: "14px 24px" }}>
-                      <span style={{
+            {loading ? (
+              <div style={{ padding: "32px", textAlign: "center", color: "var(--text-secondary)" }}>
+                Loading...
+              </div>
+            ) : assets.length === 0 ? (
+              <div style={{ padding: "32px", textAlign: "center", color: "var(--text-secondary)" }}>
+                No assets found. Add some from Swagger UI!
+              </div>
+            ) : (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ backgroundColor: "var(--bg)" }}>
+                    {["Asset Name", "Type", "Status", "Condition"].map((h) => (
+                      <th key={h} style={{
+                        padding: "12px 24px",
+                        textAlign: "left",
                         fontSize: "12px",
                         fontWeight: "600",
-                        padding: "4px 10px",
-                        borderRadius: "20px",
-                        color: statusColor[asset.status]?.color,
-                        backgroundColor: statusColor[asset.status]?.bg,
-                      }}>
-                        {asset.status}
-                      </span>
-                    </td>
+                        color: "var(--text-secondary)",
+                        textTransform: "uppercase",
+                      }}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {assets.map((asset: any) => (
+                    <tr key={asset.asset_id} style={{ borderTop: "1px solid var(--border)" }}>
+                      <td style={{ padding: "14px 24px", fontSize: "14px", fontWeight: "500", color: "var(--text-primary)" }}>
+                        {asset.name}
+                      </td>
+                      <td style={{ padding: "14px 24px", fontSize: "14px", color: "var(--text-secondary)" }}>
+                        {asset.asset_type}
+                      </td>
+                      <td style={{ padding: "14px 24px" }}>
+                        <span style={{
+                          fontSize: "12px",
+                          fontWeight: "600",
+                          padding: "4px 10px",
+                          borderRadius: "20px",
+                          color: statusColor[asset.status]?.color || "#64748b",
+                          backgroundColor: statusColor[asset.status]?.bg || "#f1f5f9",
+                        }}>
+                          {asset.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: "14px 24px", fontSize: "14px", color: "var(--text-secondary)" }}>
+                        {asset.current_condition || "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
 
         </div>

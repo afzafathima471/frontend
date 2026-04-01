@@ -13,13 +13,29 @@ const statusColor = {
 }
 
 export default function Home() {
-  const [role, setRole] = useState("admin")
+  const [role, setRole] = useState("")
+  const [name, setName] = useState("")
   const [employees, setEmployees] = useState([])
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
+  const [ready, setReady] = useState(false)
   const { setTheme } = useTheme()
 
   useEffect(() => {
+    const savedRole = localStorage.getItem("role")
+    const savedName = localStorage.getItem("name")
+    if (!savedRole) {
+      window.location.href = "/login"
+      return
+    }
+    setRole(savedRole)
+    setName(savedName || "User")
+    setTheme(savedRole === "admin" ? "dark" : "light")
+    setReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!ready) return
     const fetchData = async () => {
       try {
         const [empRes, assetRes] = await Promise.all([
@@ -37,16 +53,13 @@ export default function Home() {
       }
     }
     fetchData()
-  }, [])
+  }, [ready])
 
   const handleRoleSwitch = () => {
-    if (role === "admin") {
-      setRole("employee")
-      setTheme("light")
-    } else {
-      setRole("admin")
-      setTheme("dark")
-    }
+    const newRole = role === "admin" ? "employee" : "admin"
+    setRole(newRole)
+    setTheme(newRole === "admin" ? "dark" : "light")
+    localStorage.setItem("role", newRole)
   }
 
   const stats = [
@@ -55,6 +68,8 @@ export default function Home() {
     { label: "Available", value: assets.filter((a) => a.status === "Available").length, icon: "✅", bg: "#d1fae5" },
     { label: "In Repair", value: assets.filter((a) => a.status === "In Repair").length, icon: "🔧", bg: "#fef3c7" },
   ]
+
+  if (!ready) return null
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "var(--bg)" }}>
@@ -73,7 +88,7 @@ export default function Home() {
         }}>
           <div>
             <div style={{ fontSize: "16px", fontWeight: "600", color: "var(--text-primary)" }}>
-              👋 Welcome back, Afza
+              👋 Welcome back, {name}
             </div>
             <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
               {role === "admin" ? "Administrator View" : "Employee View"}
@@ -95,6 +110,24 @@ export default function Home() {
               }}
             >
               {role === "admin" ? "👤 Switch to Employee" : "🔐 Switch to Admin"}
+            </button>
+            <button
+              onClick={() => {
+                localStorage.clear()
+                window.location.href = "/login"
+              }}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "8px",
+                border: "none",
+                backgroundColor: "#ef4444",
+                color: "white",
+                cursor: "pointer",
+                fontSize: "13px",
+                fontWeight: "600",
+              }}
+            >
+              Logout
             </button>
             <ThemeToggle />
           </div>
@@ -163,7 +196,7 @@ export default function Home() {
                 </div>
               ) : assets.length === 0 ? (
                 <div style={{ padding: "32px", textAlign: "center", color: "var(--text-secondary)" }}>
-                  No assets found. Add some from Swagger UI!
+                  No assets found!
                 </div>
               ) : (
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -182,7 +215,7 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    {assets.map((asset: any) => (
+                    {assets.map((asset) => (
                       <tr key={asset.asset_id} style={{ borderTop: "1px solid var(--border)" }}>
                         <td style={{ padding: "14px 24px", fontSize: "14px", fontWeight: "500", color: "var(--text-primary)" }}>
                           {asset.name}
@@ -215,12 +248,7 @@ export default function Home() {
 
           {/* Employee View */}
           {role === "employee" && (
-            <div style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "24px",
-            }}>
-              {/* Welcome Card */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               <div style={{
                 backgroundColor: "var(--surface)",
                 borderRadius: "12px",
@@ -230,14 +258,13 @@ export default function Home() {
               }}>
                 <div style={{ fontSize: "48px", marginBottom: "16px" }}>👋</div>
                 <div style={{ fontSize: "20px", fontWeight: "700", color: "var(--text-primary)", marginBottom: "8px" }}>
-                  Welcome, Employee!
+                  Welcome, {name}!
                 </div>
                 <div style={{ fontSize: "14px", color: "var(--text-secondary)" }}>
                   You have access to your assigned assets only.
                 </div>
               </div>
 
-              {/* My Assets Card */}
               <div style={{
                 backgroundColor: "var(--surface)",
                 borderRadius: "12px",
@@ -249,7 +276,7 @@ export default function Home() {
                 </div>
                 {assets.filter((a) => a.status === "Assigned").length === 0 ? (
                   <div style={{ textAlign: "center", color: "var(--text-secondary)", padding: "24px" }}>
-                    No assets assigned to you yet.
+                    No assets assigned yet.
                   </div>
                 ) : (
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -268,7 +295,7 @@ export default function Home() {
                       </tr>
                     </thead>
                     <tbody>
-                      {assets.filter((a) => a.status === "Assigned").map((asset: any) => (
+                      {assets.filter((a) => a.status === "Assigned").map((asset) => (
                         <tr key={asset.asset_id} style={{ borderTop: "1px solid var(--border)" }}>
                           <td style={{ padding: "14px 24px", fontSize: "14px", fontWeight: "500", color: "var(--text-primary)" }}>
                             {asset.name}

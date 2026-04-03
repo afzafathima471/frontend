@@ -1,4 +1,4 @@
-// @ts-nocheck 
+// @ts-nocheck
 "use client"
 import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
@@ -19,6 +19,7 @@ export default function Home() {
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
   const [ready, setReady] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
   const { setTheme } = useTheme()
 
   useEffect(() => {
@@ -62,6 +63,19 @@ export default function Home() {
     localStorage.setItem("role", newRole)
   }
 
+  const filteredAssets = assets.filter((asset) => {
+    const search = searchTerm.toLowerCase()
+    const assignedEmployee = employees.find(emp => emp.employee_id === asset.employee_id)
+    
+    return (
+      asset.asset_id?.toString().includes(search) ||
+      asset.name?.toLowerCase().includes(search) ||
+      asset.status?.toLowerCase().includes(search) ||
+      assignedEmployee?.name?.toLowerCase().includes(search) ||
+      assignedEmployee?.employee_id?.toString().includes(search)
+    )
+  })
+
   const stats = [
     { label: "Total Assets", value: assets.length, icon: "💼", bg: "#eef2ff" },
     { label: "Employees", value: employees.length, icon: "👥", bg: "#e0f2fe" },
@@ -96,21 +110,42 @@ export default function Home() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <button
-              onClick={handleRoleSwitch}
+            <input 
+              type="text" 
+              placeholder="🔍 Search ID, Name, Status..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               style={{
                 padding: "8px 16px",
                 borderRadius: "8px",
                 border: "1px solid var(--border)",
-                backgroundColor: "var(--surface)",
+                backgroundColor: "var(--bg)",
                 color: "var(--text-primary)",
-                cursor: "pointer",
                 fontSize: "13px",
-                fontWeight: "600",
+                width: "250px",
+                outline: "none"
               }}
-            >
-              {role === "admin" ? "👤 Switch to Employee" : "🔐 Switch to Admin"}
-            </button>
+            />
+
+            {/* Only show Switch button if current role is admin */}
+            {role === "admin" && (
+              <button
+                onClick={handleRoleSwitch}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--surface)",
+                  color: "var(--text-primary)",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                }}
+              >
+                👤 Switch to Employee
+              </button>
+            )}
+
             <button
               onClick={() => {
                 localStorage.clear()
@@ -186,23 +221,26 @@ export default function Home() {
                 fontSize: "15px",
                 fontWeight: "600",
                 color: "var(--text-primary)",
+                display: "flex",
+                justifyContent: "space-between"
               }}>
-                Assets from Database
+                <span>Assets from Database</span>
+                {searchTerm && <span style={{fontSize: "12px", color: "#6366f1"}}>Filtered Results: {filteredAssets.length}</span>}
               </div>
 
               {loading ? (
                 <div style={{ padding: "32px", textAlign: "center", color: "var(--text-secondary)" }}>
                   Loading...
                 </div>
-              ) : assets.length === 0 ? (
+              ) : filteredAssets.length === 0 ? (
                 <div style={{ padding: "32px", textAlign: "center", color: "var(--text-secondary)" }}>
-                  No assets found!
+                  No matches found for "{searchTerm}"
                 </div>
               ) : (
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <thead>
                     <tr style={{ backgroundColor: "var(--bg)" }}>
-                      {["Asset Name", "Type", "Status", "Condition"].map((h) => (
+                      {["ID", "Asset Name", "Type", "Status", "Condition"].map((h) => (
                         <th key={h} style={{
                           padding: "12px 24px",
                           textAlign: "left",
@@ -215,8 +253,11 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    {assets.map((asset) => (
+                    {filteredAssets.map((asset) => (
                       <tr key={asset.asset_id} style={{ borderTop: "1px solid var(--border)" }}>
+                        <td style={{ padding: "14px 24px", fontSize: "14px", color: "var(--text-secondary)" }}>
+                          #{asset.asset_id}
+                        </td>
                         <td style={{ padding: "14px 24px", fontSize: "14px", fontWeight: "500", color: "var(--text-primary)" }}>
                           {asset.name}
                         </td>
@@ -323,7 +364,6 @@ export default function Home() {
               </div>
             </div>
           )}
-
         </div>
       </div>
     </div>

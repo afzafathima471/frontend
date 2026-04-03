@@ -1,9 +1,9 @@
 "use client"
 import Link from "next/link"
-import { useState } from "react"
+import { usePathname } from "next/navigation" // Added this to track the URL
 
 const adminLinks = [
-  { name: "Dashboard", path: "/dashboard", icon: "⬛" },
+  { name: "Dashboard", path: "/", icon: "⬛" }, // Changed from /dashboard to / to fix 404
   { name: "Assets", path: "/assets", icon: "💼" },
   { name: "Employees", path: "/employees", icon: "👥" },
   { name: "Assignments", path: "/assignments", icon: "🔗" },
@@ -16,7 +16,7 @@ const employeeLinks = [
 ]
 
 export default function Sidebar({ role = "admin" }: { role?: string }) {
-  const [active, setActive] = useState("Dashboard")
+  const pathname = usePathname() // This detects which page you are on
   const links = role === "admin" ? adminLinks : employeeLinks
 
   return (
@@ -49,29 +49,33 @@ export default function Sidebar({ role = "admin" }: { role?: string }) {
 
       {/* Nav Links */}
       <nav style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-        {links.map((link) => (
-          <Link
-            key={link.name}
-            href={link.path}
-            onClick={() => setActive(link.name)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "10px 12px",
-              borderRadius: "8px",
-              fontSize: "14px",
-              fontWeight: active === link.name ? "600" : "400",
-              color: active === link.name ? "#ffffff" : "var(--sidebar-text)",
-              backgroundColor: active === link.name ? "#6366f1" : "transparent",
-              textDecoration: "none",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <span style={{ fontSize: "16px" }}>{link.icon}</span>
-            {link.name}
-          </Link>
-        ))}
+        {links.map((link) => {
+          // Logic: If current URL matches link path, make it blue
+          const isActive = pathname === link.path
+
+          return (
+            <Link
+              key={link.name}
+              href={link.path}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "10px 12px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: isActive ? "600" : "400",
+                color: isActive ? "#ffffff" : "var(--sidebar-text)",
+                backgroundColor: isActive ? "#6366f1" : "transparent",
+                textDecoration: "none",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <span style={{ fontSize: "16px" }}>{link.icon}</span>
+              {link.name}
+            </Link>
+          )
+        })}
       </nav>
 
       {/* Bottom role badge */}

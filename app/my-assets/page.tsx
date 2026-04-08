@@ -14,23 +14,32 @@ export default function MyAssetsPage() {
   useEffect(() => {
     const savedRole = localStorage.getItem("role")
     const savedName = localStorage.getItem("name")
-    
-    if (!savedRole) { 
+    const savedId = localStorage.getItem("employee_id")
+
+    if (!savedRole) {
       window.location.href = "/login"
-      return 
+      return
     }
-    
+
     setRole(savedRole)
     setName(savedName || "User")
 
-    // Fetch assets and match with savedName
-    fetch("http://localhost:8000/assets")
-      .then(r => r.json())
-      .then(data => {
-        // Dashboard pe jo dikh raha hai wahi yahan dikhne ke liye filter logic:
-        const filtered = data.filter(a => 
-          a.assigned_to?.toString().toLowerCase().trim() === savedName?.toString().toLowerCase().trim()
+    // Assignments aur Assets dono fetch karo
+    Promise.all([
+      fetch("http://assetvalet-production.up.railway.app/assignments").then(r => r.json()),
+      fetch("http://assetvalet-production.up.railway.app/assets").then(r => r.json()),
+    ])
+      .then(([assignments, assets]) => {
+        // Pehle is employee ke assignment records nikalo
+        const myAssignmentAssetIds = assignments
+          .filter(asm => String(asm.employee_id) === String(savedId))
+          .map(asm => String(asm.asset_id))
+
+        // Phir un asset IDs se assets filter karo
+        const filtered = assets.filter(a =>
+          myAssignmentAssetIds.includes(String(a.asset_id))
         )
+
         setMyAssets(filtered)
         setLoading(false)
       })
@@ -41,15 +50,15 @@ export default function MyAssetsPage() {
   }, [])
 
   return (
-    <div style={{ 
-      display: "flex", 
-      minHeight: "100vh", 
-      backgroundColor: "var(--bg)", 
-      fontFamily: "Inter, -apple-system, sans-serif" // Theme font matching
+    <div style={{
+      display: "flex",
+      minHeight: "100vh",
+      backgroundColor: "var(--bg)",
+      fontFamily: "Inter, -apple-system, sans-serif"
     }}>
       <Sidebar role={role} />
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        
+
         {/* Navbar */}
         <div style={{
           height: "64px",
@@ -61,7 +70,7 @@ export default function MyAssetsPage() {
           padding: "0 32px",
         }}>
           <div style={{ fontSize: "16px", fontWeight: "600", color: "var(--text-primary)" }}>
-             My Assigned Assets
+            My Assigned Assets
           </div>
           <ThemeToggle />
         </div>
@@ -81,9 +90,9 @@ export default function MyAssetsPage() {
             <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>Fetching your assets...</p>
           ) : myAssets.length === 0 ? (
             <div style={{
-              padding: "60px 20px", 
-              textAlign: "center", 
-              backgroundColor: "var(--surface)", 
+              padding: "60px 20px",
+              textAlign: "center",
+              backgroundColor: "var(--surface)",
               borderRadius: "16px",
               border: "1px dashed var(--border)",
               display: "flex",
@@ -98,10 +107,10 @@ export default function MyAssetsPage() {
               </p>
             </div>
           ) : (
-            <div style={{ 
-              display: "grid", 
-              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", 
-              gap: "24px" 
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+              gap: "24px"
             }}>
               {myAssets.map((asset) => (
                 <div key={asset.asset_id} style={{
@@ -116,22 +125,22 @@ export default function MyAssetsPage() {
                 }}>
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
-                      <span style={{ 
-                        fontSize: "12px", 
-                        fontWeight: "700", 
-                        color: "#0d6e5a", 
-                        backgroundColor: "#e6f4f1", 
-                        padding: "4px 10px", 
+                      <span style={{
+                        fontSize: "12px",
+                        fontWeight: "700",
+                        color: "#0d6e5a",
+                        backgroundColor: "#e6f4f1",
+                        padding: "4px 10px",
                         borderRadius: "20px",
                         textTransform: "uppercase"
                       }}>
-                        {asset.category || "Asset"}
+                        {asset.asset_type || "Asset"}
                       </span>
                       <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                        #{asset.asset_tag}
+                        #{asset.asset_id}
                       </span>
                     </div>
-                    
+
                     <h3 style={{ fontSize: "18px", fontWeight: "700", color: "var(--text-primary)", margin: "0 0 12px 0" }}>
                       {asset.name}
                     </h3>
@@ -139,11 +148,11 @@ export default function MyAssetsPage() {
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
                         <span style={{ color: "var(--text-secondary)" }}>Status</span>
-                        <span style={{ color: "#10b981", fontWeight: "600" }}>Active</span>
+                        <span style={{ color: "#10b981", fontWeight: "600" }}>{asset.status}</span>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
-                        <span style={{ color: "var(--text-secondary)" }}>Serial</span>
-                        <span style={{ color: "var(--text-primary)" }}>{asset.serial_number || "N/A"}</span>
+                        <span style={{ color: "var(--text-secondary)" }}>Condition</span>
+                        <span style={{ color: "var(--text-primary)" }}>{asset.current_condition || "N/A"}</span>
                       </div>
                     </div>
                   </div>

@@ -46,9 +46,9 @@ export default function Home() {
     const fetchData = async () => {
       try {
         const [empRes, assetRes, assignRes] = await Promise.all([
-          fetch("http://localhost:8000/employees"),
-          fetch("http://localhost:8000/assets"),
-          fetch("http://localhost:8000/assignments"),
+          fetch("http://assetvalet-production.up.railway.app/employees"),
+          fetch("http://assetvalet-production.up.railway.app/assets"),
+          fetch("http://assetvalet-production.up.railway.app/assignments"),
         ]);
 
         const empData = await empRes.json();

@@ -16,8 +16,8 @@ export default function ReportsPage() {
     setRole(savedRole)
 
     Promise.all([
-      fetch("http://localhost:8000/condition-reports").then(r => r.json()),
-      fetch("http://localhost:8000/assets").then(r => r.json()),
+      fetch("http://assetvalet-production.up.railway.app/condition-reports").then(r => r.json()),
+      fetch("http://assetvalet-production.up.railway.app/assets").then(r => r.json()),
     ]).then(([r, a]) => {
       setReports(r)
       setAssets(a)

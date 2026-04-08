@@ -39,7 +39,7 @@ export default function AssetsPage() {
 
   const fetchAssets = () => {
     setLoading(true)
-    fetch("http://assetvalet-production.up.railway.app/assets")
+    fetch("https://assetvalet-production.up.railway.app/assets")
       .then(res => res.json())
       .then(data => { setAssets(data); setLoading(false) })
       .catch(() => setLoading(false))
@@ -48,7 +48,7 @@ export default function AssetsPage() {
   const handleAddAsset = async () => {
     if (!newAsset.name || !newAsset.asset_type) return alert("Please fill in Name and Type")
     try {
-      const res = await fetch("http://assetvalet-production.up.railway.app/assets", {
+      const res = await fetch("https://assetvalet-production.up.railway.app/assets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -67,7 +67,7 @@ export default function AssetsPage() {
   const handleDeleteAsset = async (id) => {
     if (!confirm("Are you sure you want to delete this asset?")) return
     try {
-      const res = await fetch(`http://assetvalet-production.up.railway.app/assets/${id}`, { method: "DELETE" })
+      const res = await fetch(`https://assetvalet-production.up.railway.app/assets/${id}`, { method: "DELETE" })
       if (res.ok) {
         fetchAssets()
         setActiveMenu(null)

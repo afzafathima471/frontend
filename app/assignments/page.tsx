@@ -17,9 +17,9 @@ export default function AssignmentsPage() {
     setRole(savedRole)
 
     Promise.all([
-      fetch("http://assetvalet-production.up.railway.app/assignments").then(r => r.json()),
-      fetch("http://assetvalet-production.up.railway.app/assets").then(r => r.json()),
-      fetch("http://assetvalet-production.up.railway.app/employees").then(r => r.json()),
+      fetch("https://assetvalet-production.up.railway.app/assignments").then(r => r.json()),
+      fetch("https://assetvalet-production.up.railway.app/assets").then(r => r.json()),
+      fetch("https://assetvalet-production.up.railway.app/employees").then(r => r.json()),
     ]).then(([a, assets, emps]) => {
       setAssignments(a)
       setAssets(assets)

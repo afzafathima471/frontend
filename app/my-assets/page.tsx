@@ -26,8 +26,8 @@ export default function MyAssetsPage() {
 
     // Assignments aur Assets dono fetch karo
     Promise.all([
-      fetch("http://assetvalet-production.up.railway.app/assignments").then(r => r.json()),
-      fetch("http://assetvalet-production.up.railway.app/assets").then(r => r.json()),
+      fetch("https://assetvalet-production.up.railway.app/assignments").then(r => r.json()),
+      fetch("https://assetvalet-production.up.railway.app/assets").then(r => r.json()),
     ])
       .then(([assignments, assets]) => {
         // Pehle is employee ke assignment records nikalo

@@ -27,12 +27,12 @@ export default function ReportIssuePage() {
     setName(savedName || "User")
 
     // 1. Saare Assets fetch karna
-    fetch("http://assetvalet-production.up.railway.app/assets")
+    fetch("https://assetvalet-production.up.railway.app/assets")
       .then(r => r.json())
       .then(data => setAssets(data))
 
     // 2. Is user ki purani reports fetch karna
-    fetch("http://assetvalet-production.up.railway.app/condition-reports")
+    fetch("https://assetvalet-production.up.railway.app/condition-reports")
       .then(r => r.json())
       .then(data => {
         // Sirf wahi reports dikhao jo is user ne submit ki hain
@@ -55,7 +55,7 @@ export default function ReportIssuePage() {
     }
 
     try {
-      const res = await fetch("http://assetvalet-production.up.railway.app/condition-reports", {
+      const res = await fetch("https://assetvalet-production.up.railway.app/condition-reports", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(reportData),

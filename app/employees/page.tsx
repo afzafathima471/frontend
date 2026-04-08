@@ -27,7 +27,7 @@ export default function EmployeesPage() {
 
   const fetchEmployees = () => {
     setLoading(true)
-    fetch("http://assetvalet-production.up.railway.app/employees")
+    fetch("https://assetvalet-production.up.railway.app/employees")
       .then(res => res.json())
       .then(data => { setEmployees(data); setLoading(false) })
       .catch(() => setLoading(false))
@@ -36,7 +36,7 @@ export default function EmployeesPage() {
   const handleAddEmployee = async () => {
     if (!newEmployee.name) return alert("Name is required")
     try {
-      const res = await fetch("http://assetvalet-production.up.railway.app/employees", {
+      const res = await fetch("https://assetvalet-production.up.railway.app/employees", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -55,7 +55,7 @@ export default function EmployeesPage() {
   const handleDeleteEmployee = async (id) => {
     if (!confirm("Are you sure you want to delete this employee?")) return
     try {
-      const res = await fetch(`http://assetvalet-production.up.railway.app/employees/${id}`, { method: "DELETE" })
+      const res = await fetch(`https://assetvalet-production.up.railway.app/employees/${id}`, { method: "DELETE" })
       if (res.ok) {
         fetchEmployees()
         setActiveMenu(null)

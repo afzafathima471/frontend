@@ -15,8 +15,10 @@ const statusColor = {
 export default function Home() {
   const [role, setRole] = useState("")
   const [name, setName] = useState("")
+  const [userId, setUserId] = useState(null)
   const [employees, setEmployees] = useState([])
   const [assets, setAssets] = useState([])
+  const [assignments, setAssignments] = useState([])
   const [loading, setLoading] = useState(true)
   const [ready, setReady] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
@@ -25,12 +27,16 @@ export default function Home() {
   useEffect(() => {
     const savedRole = localStorage.getItem("role")
     const savedName = localStorage.getItem("name")
+    const savedId = localStorage.getItem("employee_id")
+
     if (!savedRole) {
       window.location.href = "/login"
       return
     }
+
     setRole(savedRole)
     setName(savedName || "User")
+    setUserId(savedId) // Rahul ki ID yahan set hogi
     setTheme(savedRole === "admin" ? "dark" : "light")
     setReady(true)
   }, [])
@@ -39,20 +45,28 @@ export default function Home() {
     if (!ready) return
     const fetchData = async () => {
       try {
-        const [empRes, assetRes] = await Promise.all([
+        const [empRes, assetRes, assignRes] = await Promise.all([
           fetch("http://localhost:8000/employees"),
           fetch("http://localhost:8000/assets"),
-        ])
-        const empData = await empRes.json()
-        const assetData = await assetRes.json()
-        setEmployees(empData)
-        setAssets(assetData)
+          fetch("http://localhost:8000/assignments"),
+        ]);
+
+        const empData = await empRes.json();
+        const assetData = await assetRes.json();
+        const assignData = await assignRes.json(); 
+
+        setEmployees(empData);
+        setAssets(assetData);
+        setAssignments(assignData); 
+
+        console.log("userId:", userId)
+        console.log("assignments:", assignData)
       } catch (error) {
-        console.error("API Error:", error)
+        console.error("API Error:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
     fetchData()
   }, [ready])
 
@@ -75,6 +89,14 @@ export default function Home() {
       assignedEmployee?.employee_id?.toString().includes(search)
     )
   })
+
+  // Safe Mapping Logic for Employees
+  const myAssignedAssets = assets.filter((a) => {
+    return Array.isArray(assignments) && assignments.some((asm) => 
+        String(asm.asset_id) === String(a.asset_id) && 
+        String(asm.employee_id) === String(userId)
+    );
+  });
 
   const stats = [
     { label: "Total Assets", value: assets.length, icon: "💼", bg: "#eef2ff" },
@@ -127,7 +149,6 @@ export default function Home() {
               }}
             />
 
-            {/* Only show Switch button if current role is admin */}
             {role === "admin" && (
               <button
                 onClick={handleRoleSwitch}
@@ -170,8 +191,6 @@ export default function Home() {
 
         {/* Body */}
         <div style={{ padding: "32px", flex: 1 }}>
-
-          {/* Stat Cards — Admin only */}
           {role === "admin" && (
             <div style={{
               display: "grid",
@@ -206,7 +225,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Assets Table — Admin only */}
           {role === "admin" && (
             <div style={{
               backgroundColor: "var(--surface)",
@@ -225,7 +243,6 @@ export default function Home() {
                 justifyContent: "space-between"
               }}>
                 <span>Assets from Database</span>
-                {searchTerm && <span style={{fontSize: "12px", color: "#6366f1"}}>Filtered Results: {filteredAssets.length}</span>}
               </div>
 
               {loading ? (
@@ -234,7 +251,7 @@ export default function Home() {
                 </div>
               ) : filteredAssets.length === 0 ? (
                 <div style={{ padding: "32px", textAlign: "center", color: "var(--text-secondary)" }}>
-                  No matches found for "{searchTerm}"
+                  No matches found.
                 </div>
               ) : (
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -287,7 +304,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Employee View */}
           {role === "employee" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               <div style={{
@@ -315,7 +331,7 @@ export default function Home() {
                 <div style={{ fontSize: "15px", fontWeight: "600", color: "var(--text-primary)", marginBottom: "16px" }}>
                   💼 My Assigned Assets
                 </div>
-                {assets.filter((a) => a.status === "Assigned").length === 0 ? (
+                {myAssignedAssets.length === 0 ? (
                   <div style={{ textAlign: "center", color: "var(--text-secondary)", padding: "24px" }}>
                     No assets assigned yet.
                   </div>
@@ -336,7 +352,7 @@ export default function Home() {
                       </tr>
                     </thead>
                     <tbody>
-                      {assets.filter((a) => a.status === "Assigned").map((asset) => (
+                      {myAssignedAssets.map((asset) => (
                         <tr key={asset.asset_id} style={{ borderTop: "1px solid var(--border)" }}>
                           <td style={{ padding: "14px 24px", fontSize: "14px", fontWeight: "500", color: "var(--text-primary)" }}>
                             {asset.name}

@@ -35,7 +35,7 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      // LocalStorage mein save karo
+      
       if (data) {
       localStorage.setItem("employee_id", String(data.employee_id));
       localStorage.setItem("role", data.role);

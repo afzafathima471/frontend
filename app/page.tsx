@@ -36,7 +36,7 @@ export default function Home() {
 
     setRole(savedRole)
     setName(savedName || "User")
-    setUserId(savedId) // Rahul ki ID yahan set hogi
+    setUserId(savedId)
     setTheme(savedRole === "admin" ? "dark" : "light")
     setReady(true)
   }, [])
@@ -53,11 +53,11 @@ export default function Home() {
 
         const empData = await empRes.json();
         const assetData = await assetRes.json();
-        const assignData = await assignRes.json(); 
+        const assignData = await assignRes.json();
 
         setEmployees(empData);
         setAssets(assetData);
-        setAssignments(assignData); 
+        setAssignments(assignData);
 
         console.log("userId:", userId)
         console.log("assignments:", assignData)
@@ -70,17 +70,10 @@ export default function Home() {
     fetchData()
   }, [ready])
 
-  const handleRoleSwitch = () => {
-    const newRole = role === "admin" ? "employee" : "admin"
-    setRole(newRole)
-    setTheme(newRole === "admin" ? "dark" : "light")
-    localStorage.setItem("role", newRole)
-  }
-
   const filteredAssets = assets.filter((asset) => {
     const search = searchTerm.toLowerCase()
     const assignedEmployee = employees.find(emp => emp.employee_id === asset.employee_id)
-    
+
     return (
       asset.asset_id?.toString().includes(search) ||
       asset.name?.toLowerCase().includes(search) ||
@@ -90,11 +83,10 @@ export default function Home() {
     )
   })
 
-  // Safe Mapping Logic for Employees
   const myAssignedAssets = assets.filter((a) => {
-    return Array.isArray(assignments) && assignments.some((asm) => 
-        String(asm.asset_id) === String(a.asset_id) && 
-        String(asm.employee_id) === String(userId)
+    return Array.isArray(assignments) && assignments.some((asm) =>
+      String(asm.asset_id) === String(a.asset_id) &&
+      String(asm.employee_id) === String(userId)
     );
   });
 
@@ -132,9 +124,9 @@ export default function Home() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <input 
-              type="text" 
-              placeholder="🔍 Search ID, Name, Status..." 
+            <input
+              type="text"
+              placeholder="🔍 Search ID, Name, Status..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
@@ -148,24 +140,6 @@ export default function Home() {
                 outline: "none"
               }}
             />
-
-            {role === "admin" && (
-              <button
-                onClick={handleRoleSwitch}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  border: "1px solid var(--border)",
-                  backgroundColor: "var(--surface)",
-                  color: "var(--text-primary)",
-                  cursor: "pointer",
-                  fontSize: "13px",
-                  fontWeight: "600",
-                }}
-              >
-                👤 Switch to Employee
-              </button>
-            )}
 
             <button
               onClick={() => {

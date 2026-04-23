@@ -18,7 +18,6 @@ export default function AssetsPage() {
   const [name, setName] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
   
-  // States for Add and Delete functionality
   const [showAddModal, setShowAddModal] = useState(false)
   const [activeMenu, setActiveMenu] = useState(null)
   const [newAsset, setNewAsset] = useState({ 
@@ -75,6 +74,27 @@ export default function AssetsPage() {
     } catch (err) { console.error(err) }
   }
 
+  // ✅ NEW: Status update handler
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      const res = await fetch(`https://assetvalet-production.up.railway.app/assets/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      })
+      if (res.ok) {
+        setAssets(prev =>
+          prev.map(a => a.asset_id === id ? { ...a, status: newStatus } : a)
+        )
+      } else {
+        alert("Failed to update status")
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Error updating status")
+    }
+  }
+
   const filteredAssets = assets.filter(asset => {
     const search = searchTerm.toLowerCase()
     return (
@@ -102,13 +122,10 @@ export default function AssetsPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ padding: "8px 16px", borderRadius: "8px", border: "1px solid var(--border)", backgroundColor: "var(--bg)", color: "var(--text-primary)", width: "250px", fontSize: "14px", outline: "none" }}
             />
-            
-            {/* Add Asset Button - Green to match Employee Page */}
             <button
               onClick={() => setShowAddModal(true)}
               style={{ padding: "8px 16px", borderRadius: "8px", border: "none", backgroundColor: "#10b981", color: "white", cursor: "pointer", fontSize: "13px", fontWeight: "600" }}
             >+ Add Asset</button>
-            
             <button
               onClick={() => { localStorage.clear(); window.location.href = "/login" }}
               style={{ padding: "8px 16px", borderRadius: "8px", border: "none", backgroundColor: "#ef4444", color: "white", cursor: "pointer", fontSize: "13px", fontWeight: "600" }}
@@ -119,7 +136,6 @@ export default function AssetsPage() {
 
         <div style={{ padding: "32px" }}>
           
-          {/* Add Asset Form */}
           {showAddModal && (
             <div style={{ marginBottom: "24px", padding: "24px", backgroundColor: "var(--surface)", borderRadius: "12px", border: "1px solid var(--border)" }}>
               <h3 style={{ marginBottom: "16px", color: "var(--text-primary)" }}>New Asset Details</h3>
@@ -141,7 +157,6 @@ export default function AssetsPage() {
             </div>
           )}
 
-          {/* Table Container */}
           <div style={{ backgroundColor: "var(--surface)", borderRadius: "12px", border: "1px solid var(--border)", overflow: "visible" }}>
             <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border)", fontSize: "15px", fontWeight: "600", color: "var(--text-primary)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span>All Assets</span>
@@ -165,9 +180,31 @@ export default function AssetsPage() {
                       <td style={{ padding: "14px 24px", fontSize: "14px", fontWeight: "500", color: "var(--text-primary)" }}>{asset.name}</td>
                       <td style={{ padding: "14px 24px", fontSize: "14px", color: "var(--text-secondary)" }}>{asset.asset_type}</td>
                       <td style={{ padding: "14px 24px", fontSize: "14px", color: "var(--text-secondary)" }}>{asset.purchase_date}</td>
+                      
+                      {/* ✅ CHANGED: Status dropdown instead of badge */}
                       <td style={{ padding: "14px 24px" }}>
-                        <span style={{ fontSize: "12px", fontWeight: "600", padding: "4px 10px", borderRadius: "20px", color: statusColor[asset.status]?.color || "#64748b", backgroundColor: statusColor[asset.status]?.bg || "#f1f5f9" }}>{asset.status}</span>
+                        <select
+                          value={asset.status}
+                          onChange={(e) => handleStatusChange(asset.asset_id, e.target.value)}
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            padding: "4px 10px",
+                            borderRadius: "20px",
+                            border: "none",
+                            cursor: "pointer",
+                            outline: "none",
+                            color: statusColor[asset.status]?.color || "#64748b",
+                            backgroundColor: statusColor[asset.status]?.bg || "#f1f5f9",
+                          }}
+                        >
+                          <option value="Available">Available</option>
+                          <option value="Assigned">Assigned</option>
+                          <option value="In Repair">In Repair</option>
+                          <option value="Retired">Retired</option>
+                        </select>
                       </td>
+
                       <td style={{ padding: "14px 24px", fontSize: "14px", color: "var(--text-secondary)" }}>{asset.current_condition || "—"}</td>
                       <td style={{ padding: "14px 24px", position: "relative" }}>
                         <button 

@@ -122,7 +122,7 @@ export default function ReportsPage() {
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ backgroundColor: "var(--bg)" }}>
-                    {["ID", "Asset", "Date", "Condition", "Description", "Action Taken"].map(h => (
+                    {["ID", "Asset", "Evidence", "Date", "Condition", "Description", "Action Taken"].map(h => (
                       <th key={h} style={{
                         padding: "12px 24px", textAlign: "left", fontSize: "12px",
                         fontWeight: "600", color: "var(--text-secondary)", textTransform: "uppercase",
@@ -138,6 +138,29 @@ export default function ReportsPage() {
                       </td>
                       <td style={{ padding: "14px 24px", fontSize: "14px", fontWeight: "500", color: "var(--text-primary)" }}>
                         {getAssetName(report.asset_id)}
+                      </td>
+                      {/* Evidence Column */}
+                      <td style={{ padding: "14px 24px" }}>
+                        {report.image ? (
+                          <img 
+                            src={report.image} 
+                            alt="Evidence" 
+                            style={{ 
+                              width: "48px", 
+                              height: "48px", 
+                              borderRadius: "6px", 
+                              objectFit: "cover",
+                              border: "1px solid var(--border)",
+                              cursor: "pointer"
+                            }} 
+                            onClick={() => {
+                              const win = window.open()
+                              win?.document.write(`<img src="${report.image}" style="max-width:100%;max-height:100vh;" />`)
+                            }}
+                          />
+                        ) : (
+                          <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>No Image</span>
+                        )}
                       </td>
                       <td style={{ padding: "14px 24px", fontSize: "14px", color: "var(--text-secondary)" }}>
                         {report.report_date}

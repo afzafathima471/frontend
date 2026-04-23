@@ -11,12 +11,14 @@ export default function ReportIssuePage() {
   const [name, setName] = useState("")
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [imagePreview, setImagePreview] = useState(null)  // ✅ NEW
   const [form, setForm] = useState({
     asset_id: "",
     condition_status: "Damaged",
     description: "",
     action_taken: "",
     report_date: new Date().toISOString().split("T")[0],
+    image: "",  // ✅ NEW
   })
 
   useEffect(() => {
@@ -26,20 +28,29 @@ export default function ReportIssuePage() {
     setRole(savedRole)
     setName(savedName || "User")
 
-    // 1. Saare Assets fetch karna
     fetch("https://assetvalet-production.up.railway.app/assets")
       .then(r => r.json())
       .then(data => setAssets(data))
 
-    // 2. Is user ki purani reports fetch karna
     fetch("https://assetvalet-production.up.railway.app/condition-reports")
       .then(r => r.json())
       .then(data => {
-        // Sirf wahi reports dikhao jo is user ne submit ki hain
         const filtered = data.filter(r => r.reported_by === (savedName || "User"))
-        setMyReports(filtered.reverse()) // Latest report upar dikhegi
+        setMyReports(filtered.reverse())
       })
   }, [])
+
+  // ✅ NEW: Image upload handler
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setForm({ ...form, image: reader.result })
+      setImagePreview(reader.result)
+    }
+    reader.readAsDataURL(file)
+  }
 
   const handleSubmit = async () => {
     if (!form.asset_id || !form.description) {
@@ -51,7 +62,7 @@ export default function ReportIssuePage() {
     const reportData = {
       ...form,
       asset_id: parseInt(form.asset_id),
-      reported_by: name, // Tracking ke liye name bhej rahe hain
+      reported_by: name,
     }
 
     try {
@@ -63,15 +74,15 @@ export default function ReportIssuePage() {
       
       if (res.ok) {
         setSuccess(true)
-        // Turant list mein nayi report add karna
         setMyReports([reportData, ...myReports])
-        
+        setImagePreview(null)  // ✅ NEW
         setForm({
           asset_id: "",
           condition_status: "Damaged",
           description: "",
           action_taken: "",
           report_date: new Date().toISOString().split("T")[0],
+          image: "",  // ✅ NEW
         })
         setTimeout(() => setSuccess(false), 3000)
       }
@@ -194,6 +205,47 @@ export default function ReportIssuePage() {
                 />
               </div>
 
+              {/* ✅ NEW: Photo Upload */}
+              <div style={{ marginBottom: "20px" }}>
+                <label style={{ fontSize: "13px", fontWeight: "600", color: "var(--text-primary)", display: "block", marginBottom: "8px" }}>
+                  📷 Upload Evidence Photo
+                </label>
+                <label style={{
+                  display: "flex", alignItems: "center", gap: "10px",
+                  padding: "12px 16px", borderRadius: "10px",
+                  border: "1.5px dashed var(--border)", cursor: "pointer",
+                  backgroundColor: "var(--bg)", color: "var(--text-secondary)",
+                  fontSize: "14px",
+                }}>
+                  <span>📁</span>
+                  <span>{imagePreview ? "Photo selected ✅" : "Click to upload photo"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{ display: "none" }}
+                  />
+                </label>
+                {imagePreview && (
+                  <div style={{ marginTop: "12px", position: "relative", display: "inline-block" }}>
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      style={{ width: "120px", height: "120px", borderRadius: "8px", objectFit: "cover", border: "1px solid var(--border)" }}
+                    />
+                    <button
+                      onClick={() => { setImagePreview(null); setForm({ ...form, image: "" }) }}
+                      style={{
+                        position: "absolute", top: "-8px", right: "-8px",
+                        background: "#ef4444", color: "white", border: "none",
+                        borderRadius: "50%", width: "20px", height: "20px",
+                        cursor: "pointer", fontSize: "12px", fontWeight: "700",
+                      }}
+                    >✕</button>
+                  </div>
+                )}
+              </div>
+
               <button
                 onClick={handleSubmit}
                 disabled={loading}
@@ -237,6 +289,15 @@ export default function ReportIssuePage() {
                       }}>{report.condition_status}</span>
                     </div>
                     <div style={{ fontSize: "13px", color: "var(--text-primary)" }}>{report.description}</div>
+                    {/* ✅ NEW: Show image in previous reports */}
+                    {report.image && (
+                      <img
+                        src={report.image}
+                        alt="Evidence"
+                        style={{ marginTop: "8px", width: "60px", height: "60px", borderRadius: "6px", objectFit: "cover", border: "1px solid var(--border)", cursor: "pointer" }}
+                        onClick={() => window.open(report.image, '_blank')}
+                      />
+                    )}
                     <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "8px" }}>{report.report_date}</div>
                   </div>
                 ))
